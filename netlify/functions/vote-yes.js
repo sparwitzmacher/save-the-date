@@ -1,15 +1,22 @@
-export default async (req, context) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+import fs from "fs";
+import path from "path";
+
+const filePath = path.join(process.cwd(), "netlify/functions/counter.json");
+
+export default async (req) => {
+  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+
+  let count = 0;
+  try {
+    const data = fs.readFileSync(filePath);
+    count = JSON.parse(data).yesCount || 0;
+  } catch (e) {
+    count = 0;
   }
 
-  const kv = context.env.MY_STORE; // Name deiner KV-Binding
-  const current = (await kv.get("yesCount")) || 0;
-  const updated = parseInt(current) + 1;
-  await kv.set("yesCount", updated);
+  count += 1;
 
-  return new Response(JSON.stringify({ success: true, count: updated }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  fs.writeFileSync(filePath, JSON.stringify({ yesCount: count }));
+
+  return new Response(JSON.stringify({ success: true, count }), { headers: { "Content-Type": "application/json" } });
 };
-
