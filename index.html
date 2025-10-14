@@ -1,104 +1,90 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Save the Date — Video + ICS</title>
-  <style>
-    body{font-family:sans-serif;background:#fafafa;margin:0;padding:20px}
-    .card{background:#fff;padding:20px;border-radius:12px;max-width:800px;margin:auto;box-shadow:0 6px 18px rgba(0,0,0,.1)}
-    video{width:100%;border-radius:8px;background:#000}
-    .hidden{display:none}
-    .buttons{margin-top:10px;display:flex;gap:10px}
-    button{padding:10px 14px;border-radius:8px;cursor:pointer;border:1px solid #ccc}
-    button.primary{background:#7c3aed;color:white;border:none}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>Save the Date</h1>
-    <video id="video" controls playsinline preload="metadata">
-      <source src="video.mp4" type="video/mp4">
-      Dein Browser unterstützt dieses Video nicht.
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save the Date – Kim & Matthias 💍</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
+
+    <style>
+      body {
+        margin: 0;
+        font-family: "Playfair Display", serif;
+        color: #333;
+        text-align: center;
+        background: linear-gradient(135deg, #fff5f7, #fdf0d5);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #b56576;
+      }
+
+      video {
+        width: 90%;
+        max-width: 700px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+      }
+
+      button {
+        background-color: #b56576;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 28px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #8d4d5f;
+        transform: scale(1.05);
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: #555;
+      }
+
+      footer {
+        margin-top: 2rem;
+        font-size: 0.9rem;
+        color: #888;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Save the Date – Kim & Matthias 💕</h1>
+
+    <video controls>
+      <source src="video.mp4" type="video/mp4" />
+      Dein Browser unterstützt kein Videoelement.
     </video>
 
-    <div id="survey" class="hidden">
-      <h2>Möchtest du dir den Termin vormerken?</h2>
-      <div class="buttons">
-        <button id="btnYes" class="primary">Ja</button>
-        <button id="btnNo">Nein</button>
-      </div>
-      <div id="message"></div>
-    </div>
-  </div>
+    <p>Hat dir das Video gefallen? Möchtest du dir den Hochzeitstermin vormerken?</p>
 
-  <script>
-    const EVENT = {
-      title: "Hochzeit von Kim und Matthias",
-      location: "Scheunenwirtin, Helmut-Ginzkey-Weg 10, 73566 Bartholomä",
-      description: "Wir freuen uns auf euch!",
-      startLocal: "2026-08-14T13:00",
-      endLocal:   "2025-08-14T22:00",
-      filename: "HochzeitKimUndMatthias.ics"
-    };
+    <button id="yesButton">Ja, ich bin dabei!</button>
 
-    function parseLocalDateTime(s){
-      const [date,time] = s.split('T');
-      const [y,m,d] = date.split('-').map(Number);
-      const [hh,mm] = (time||'00:00').split(':').map(Number);
-      return new Date(y, m-1, d, hh, mm, 0);
-    }
-    function pad(n){return String(n).padStart(2,'0');}
-    function formatICSTime(d){
-      return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+
-             pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
-    }
-    function escapeICSText(s){return String(s).replace(/\\/g,'\\\\').replace(/\\n/g,'\\\\n').replace(/,/g,'\\\\,').replace(/;/g,'\\\\;');}
-    function generateICS(ev){
-      const start=parseLocalDateTime(ev.startLocal), end=parseLocalDateTime(ev.endLocal);
-      const dtstamp=formatICSTime(new Date());
-      const lines=[
-        "BEGIN:VCALENDAR","VERSION:2.0","CALSCALE:GREGORIAN","BEGIN:VEVENT",
-        "UID:"+Date.now()+"@savethedate",
-        "DTSTAMP:"+dtstamp,
-        "DTSTART:"+formatICSTime(start),
-        "DTEND:"+formatICSTime(end),
-        "SUMMARY:"+escapeICSText(ev.title),
-        "LOCATION:"+escapeICSText(ev.location),
-        "DESCRIPTION:"+escapeICSText(ev.description),
-        "END:VEVENT","END:VCALENDAR"
-      ];
-      return lines.join("\\r\\n");
-    }
-    function downloadICS(content, filename){
-      const blob=new Blob([content],{type:'text/calendar'});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),1000);
-    }
+    <footer>Wir freuen uns auf euch – Kim & Matthias</footer>
 
-    const video=document.getElementById("video");
-    const survey=document.getElementById("survey");
-    const btnYes=document.getElementById("btnYes");
-    const btnNo=document.getElementById("btnNo");
-    const msg=document.getElementById("message");
-
-    video.addEventListener("ended", ()=>survey.classList.remove("hidden"));
-
-    btnYes.addEventListener("click", async ()=>{
-      // 1) ICS herunterladen
-      downloadICS(generateICS(EVENT), EVENT.filename);
-
-      // 2) Stimme auf Server zählen
-      try {
-        await fetch("/.netlify/functions/vote",{method:"POST"});
-        msg.textContent="Danke! Termin gespeichert und Stimme gezählt.";
-      } catch(e){
-        msg.textContent="Kalender gespeichert, aber Fehler beim Zählen.";
-      }
-    });
-
-    btnNo.addEventListener("click", ()=>msg.textContent="Danke für deine Rückmeldung!");
-  </script>
-</body>
-</html>
+    <script>
+      document.getElementById("yesButton").addEventListener("click", async () => {
+        try {
+          const response = await fetch("/.netlify/functions/vote-yes", { method: "POST" });
+          const result = await response.json();
+          console.log("Antwort:", result);
+          window.location.href = "save-the-date.ics"; // Kalenderdatei öffnen
+        } catch (err) {
+          alert("Etwas ist schiefgelaufen 😔
