@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Save the Date – Kim & Matthias 💍</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       body {
         margin: 0;
@@ -19,19 +23,47 @@
         justify-content: center;
         align-items: center;
       }
-      h1 { font-size: 2.5rem; margin-bottom: 1rem; color: #b56576; }
-      video {
-        width: 90%; max-width: 700px; border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15); margin-bottom: 2rem;
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #b56576;
       }
+
+      video {
+        width: 90%;
+        max-width: 700px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        margin-bottom: 2rem;
+      }
+
       button {
-        background-color: #b56576; color: white; border: none; border-radius: 30px;
-        padding: 12px 28px; font-size: 1.2rem; cursor: pointer;
+        background-color: #b56576;
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 12px 28px;
+        font-size: 1.2rem;
+        cursor: pointer;
         transition: all 0.3s ease;
       }
-      button:hover { background-color: #8d4d5f; transform: scale(1.05); }
-      p { font-size: 1.1rem; color: #555; }
-      footer { margin-top: 2rem; font-size: 0.9rem; color: #888; }
+
+      button:hover {
+        background-color: #8d4d5f;
+        transform: scale(1.05);
+      }
+
+      p {
+        font-size: 1.1rem;
+        color: #555;
+      }
+
+      footer {
+        margin-top: 2rem;
+        font-size: 0.9rem;
+        color: #888;
+      }
     </style>
   </head>
 
@@ -44,6 +76,7 @@
     </video>
 
     <p>Hat dir das Video gefallen? Möchtest du dir den Hochzeitstermin vormerken?</p>
+
     <button id="yesButton">Ja, ich bin dabei!</button>
 
     <footer>Wir freuen uns auf euch – Kim & Matthias</footer>
@@ -51,21 +84,24 @@
     <script>
       document.getElementById("yesButton").addEventListener("click", async () => {
         try {
-          await fetch("/.netlify/functions/vote-yes", { method: "POST" });
+          // Optional: Aufruf deiner Netlify Function
+          fetch("/.netlify/functions/vote-yes", { method: "POST" }).catch(() =>
+            console.warn("Vote-Funktion nicht erreichbar (lokal ok)")
+          );
 
+          // 🎉 ICS-Inhalt erzeugen
           const title = "Hochzeit von Kim & Matthias 💍";
           const desc = "Wir freuen uns auf dich! Save the Date 💕";
           const location = "Scheunenwirtin, Helmut-Ginzkey-Weg 10, 73566 Bartholomä";
           const start = "20260814T130000Z";
-          const end = "20260814T230000Z";
+          const end = "20260815T030000Z";
 
-          const ics = `
-BEGIN:VCALENDAR
+          const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//KimUndMatthias//SaveTheDate//DE
 BEGIN:VEVENT
 UID:${Date.now()}@kimundmatthias.de
-DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").split(".")[0]}Z
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z
 DTSTART:${start}
 DTEND:${end}
 SUMMARY:${title}
@@ -74,12 +110,16 @@ DESCRIPTION:${desc}
 END:VEVENT
 END:VCALENDAR`;
 
-          const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+          // 🎁 Blob & Download-Link erstellen
+          const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
           const url = URL.createObjectURL(blob);
+
           const a = document.createElement("a");
           a.href = url;
           a.download = "Save-the-Date.ics";
+          document.body.appendChild(a); // wichtig für Safari & Opera!
           a.click();
+          document.body.removeChild(a);
           URL.revokeObjectURL(url);
 
           alert("🎉 Danke! Dein Termin wurde gespeichert.");
